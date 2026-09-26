@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FinSimplify — AI Financial News Simplifier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1A1035; --ink-soft:#5F5A7A; --bg:#F6F5FC; --surface:#FFFFFF;
+  --primary:#5B4FE0; --primary-dark:#4638C2; --primary-100:#ECEAFB;
+  --accent:#FF6B5B; --accent-dark:#DB4C3D;
+  --line:#E4E1F5; --good:#189A6B; --good-bg:#E2F7EE; --warn:#C97A16; --warn-bg:#FBF0DE;
+  --radius:14px; --shadow:0 10px 28px rgba(26,16,53,.08);
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,.brand{font-family:'Plus Jakarta Sans',system-ui,sans-serif;letter-spacing:-.01em}
+a{color:inherit;text-decoration:none}
+button,select,input,textarea{font-family:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:999px;font-weight:600;font-size:.93rem;border:1px solid transparent;cursor:pointer;transition:transform .12s,background .15s,box-shadow .15s}
+.btn:active{transform:scale(.97)}
+.btn:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 8px 20px rgba(91,79,224,.28)}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-accent{background:var(--accent);color:#fff;box-shadow:0 8px 20px rgba(255,107,91,.3)}
+.btn-accent:hover{background:var(--accent-dark)}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--primary);background:var(--primary-100)}
+.btn-sm{padding:8px 15px;font-size:.82rem}
+
+/* ===== LANDING ===== */
+.land-nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:60;background:rgba(246,245,252,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.land-nav .bar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;max-width:1180px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:1.2rem;color:var(--primary-dark)}
+.brand .mark{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.95rem}
+.land-links{display:none;gap:26px;font-size:.92rem;font-weight:500;color:var(--ink-soft)}
+@media(min-width:760px){.land-links{display:flex}}
+
+.hero{padding:68px 0 54px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;top:-140px;right:-160px;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle at 30% 30%,var(--primary-100),transparent 70%);z-index:0}
+.hero .wrap{position:relative;z-index:1;display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center}
+@media(max-width:860px){.hero .wrap{grid-template-columns:1fr}}
+.eyebrow{display:inline-flex;align-items:center;gap:7px;background:var(--primary-100);color:var(--primary-dark);font-size:.8rem;font-weight:600;padding:7px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{font-size:clamp(2.1rem,4vw,3.1rem);font-weight:800;line-height:1.1;margin-bottom:14px}
+.hero .tag{font-size:1.14rem;color:var(--primary-dark);font-weight:600;margin-bottom:14px}
+.hero p.lead{color:var(--ink-soft);max-width:50ch;margin-bottom:26px}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap}
+.hero-demo{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:22px}
+.hd-label{font-size:.76rem;font-weight:700;color:var(--primary-dark);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+.hd-headline{font-weight:700;margin-bottom:10px;font-size:1.02rem}
+.hd-simple{background:var(--primary-100);border-radius:10px;padding:12px 14px;font-size:.87rem;color:var(--ink)}
+
+.feat-section{padding:56px 0}
+.section-head{max-width:640px;margin:0 auto 36px;text-align:center}
+.section-head h2{font-size:clamp(1.5rem,2.6vw,2rem);margin-bottom:8px}
+.section-head p{color:var(--ink-soft)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:860px){.grid3{grid-template-columns:1fr}}
+.feat-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+.feat-card .ico{width:40px;height:40px;border-radius:10px;background:var(--primary-100);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:1.1rem}
+.feat-card h3{font-size:1rem;margin-bottom:6px}
+.feat-card p{font-size:.9rem;color:var(--ink-soft)}
+
+.cta-band{background:var(--primary-dark);color:#fff;border-radius:24px;margin:0 24px 64px;padding:46px 32px;text-align:center;max-width:1130px;margin-left:auto;margin-right:auto}
+.cta-band h2{margin-bottom:10px}
+.cta-band p{color:#DAD5FA;margin-bottom:22px}
+.land-footer{border-top:1px solid var(--line);padding:26px 0;text-align:center;color:var(--ink-soft);font-size:.84rem}
+
+/* ===== APP SHELL ===== */
+#app-shell{display:none;min-height:100vh}
+.app-nav{position:sticky;top:0;z-index:70;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.app-nav .bar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;max-width:1180px;margin:0 auto}
+.app-links{display:none;gap:6px}
+@media(min-width:860px){.app-links{display:flex}}
+.app-link{padding:9px 15px;border-radius:9px;font-weight:600;font-size:.9rem;color:var(--ink-soft);background:none;border:none}
+.app-link:hover{background:var(--primary-100);color:var(--primary-dark)}
+.app-link.active{background:var(--primary);color:#fff}
+.hamburger{display:block;background:none;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+@media(min-width:860px){.hamburger{display:none}}
+.mobile-menu{display:none;flex-direction:column;gap:4px;padding:10px 20px 16px;border-bottom:1px solid var(--line);background:var(--surface)}
+.mobile-menu.open{display:flex}
+.mobile-menu .app-link{text-align:left}
+
+.main{padding:28px 24px 60px;max-width:1180px;margin:0 auto}
+@media(max-width:600px){.main{padding:20px 16px 50px}}
+.page{display:none}
+.page.active{display:block}
+.page-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:24px}
+.page-head h1{font-size:1.6rem}
+.page-head p{color:var(--ink-soft);font-size:.92rem;margin-top:4px}
+.demo-tag{display:inline-flex;align-items:center;gap:6px;background:var(--warn-bg);color:var(--warn);font-size:.74rem;font-weight:700;padding:4px 10px;border-radius:999px;margin-left:8px;vertical-align:middle}
+
+/* Stat cards */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px}
+@media(max-width:960px){.stat-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.stat-grid{grid-template-columns:1fr}}
+.stat-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.stat-card .lbl{font-size:.8rem;color:var(--ink-soft);margin-bottom:6px}
+.stat-card .amt{font-family:'Plus Jakarta Sans';font-size:1.4rem;font-weight:700}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+.panel + .panel{margin-top:20px}
+.panel h3{font-size:1.02rem;margin-bottom:14px}
+
+/* filters */
+.filter-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:22px}
+.search-box{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--line);border-radius:11px;padding:10px 14px}
+.search-box input{border:none;outline:none;background:none;font-size:.92rem;width:100%}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:8px 14px;border-radius:999px;font-size:.83rem;font-weight:600;background:var(--surface);border:1.5px solid var(--line);color:var(--ink-soft)}
+.chip.active{background:var(--primary);border-color:var(--primary);color:#fff}
+
+/* News cards */
+.news-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+@media(max-width:860px){.news-grid{grid-template-columns:1fr}}
+.news-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:10px}
+.news-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.cat-chip{font-size:.74rem;font-weight:700;padding:4px 11px;border-radius:999px}
+.cat-Stock-Market{background:#EAF1FB;color:#1F5FA8}
+.cat-Banking{background:#E8F6EF;color:#18804F}
+.cat-Economy{background:#FDF0E3;color:#B5650F}
+.cat-Business{background:#F3EAFB;color:#7433C4}
+.cat-Technology{background:#E7F5F6;color:#127079}
+.cat-Global-Markets{background:#FBEAF0;color:#B23A6C}
+.news-date{font-size:.78rem;color:var(--ink-soft)}
+.news-card h4{font-size:1.02rem;line-height:1.35}
+.news-card .summary{font-size:.88rem;color:var(--ink-soft)}
+.news-actions{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap}
+
+/* Simplify page */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.form-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+.field label{font-size:.84rem;font-weight:600}
+.field input,.field select,.field textarea{border:1.5px solid var(--line);border-radius:9px;padding:10px 12px;font-size:.92rem;background:#FBFAFE;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-100)}
+.field .err{font-size:.76rem;color:var(--accent-dark);min-height:15px}
+.form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+
+.ai-panel{display:none;margin-top:24px}
+.ai-panel.show{display:block}
+.ai-section{border-left:4px solid var(--primary);background:var(--primary-100);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.ai-section h4{font-size:.92rem;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.ai-section p{font-size:.9rem;color:var(--ink)}
+.ai-section ul{margin:6px 0 0 18px;font-size:.89rem}
+.ai-section.terms{background:#FFF6E9;border-left-color:var(--warn)}
+.term-pill{display:inline-block;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:9px 12px;margin:4px 6px 0 0;font-size:.85rem}
+.term-pill b{color:var(--primary-dark)}
+.impact-note{font-size:.78rem;color:var(--ink-soft);font-style:italic;margin-top:8px}
+
+/* Terms glossary */
+.term-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:860px){.term-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.term-grid{grid-template-columns:1fr}}
+.term-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+.term-card h4{color:var(--primary-dark);margin-bottom:8px}
+.term-card p{font-size:.9rem;color:var(--ink-soft)}
+
+/* Modal for Read More */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,16,53,.45);z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:18px;padding:26px;max-width:620px;width:100%;max-height:88vh;overflow-y:auto}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
+.modal-close{background:none;border:none;font-size:1.3rem;color:var(--ink-soft);cursor:pointer}
+.modal-body p{color:var(--ink-soft);font-size:.94rem;margin-bottom:10px}
+
+.topic-chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:.85rem;font-weight:600;margin:0 8px 8px 0}
+.topic-chip span{color:var(--ink-soft);font-weight:400}
+
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ================= LANDING ================= -->
+<div id="view-home">
+  <header class="land-nav">
+    <div class="bar">
+      <div class="brand"><span class="mark">F</span>FinSimplify</div>
+      <nav class="land-links"><a href="#feat">Features</a><a href="#demo">Demo</a></nav>
+      <button class="btn btn-primary" onclick="enterApp()">Open App →</button>
+    </div>
+  </header>
+
+  <section class="hero" id="demo">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">AI-style news simplification, in your browser</span>
+        <h1>FinSimplify</h1>
+        <p class="tag">Understand Financial News. Simply.</p>
+        <p class="lead">Paste any financial or business news article and get a plain-English summary, key terms explained, and the general market impact — no jargon, no personalized advice.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" onclick="enterApp()">Open App →</button>
+          <a href="#feat" class="btn btn-ghost">See features</a>
+        </div>
+      </div>
+      <div class="hero-demo">
+        <div class="hd-label">Original headline</div>
+        <div class="hd-headline">RBI holds repo rate steady amid moderating inflation, signals cautious optimism</div>
+        <div class="hd-label" style="margin-top:14px">Simplified</div>
+        <div class="hd-simple">The Reserve Bank of India kept its lending rate unchanged because rising prices are slowing down. This generally means borrowing costs should stay stable for now.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="feat-section" id="feat">
+    <div class="wrap">
+      <div class="section-head"><h2>Financial news, without the jargon</h2><p>Built for students and first-time readers of business news.</p></div>
+      <div class="grid3">
+        <div class="feat-card"><div class="ico">📰</div><h3>Paste & simplify</h3><p>Drop in a headline and article text, pick a category, and get a plain-English breakdown.</p></div>
+        <div class="feat-card"><div class="ico">📖</div><h3>Key terms explained</h3><p>Financial jargon found in the article is automatically flagged and explained simply.</p></div>
+        <div class="feat-card"><div class="ico">📊</div><h3>Dashboard & glossary</h3><p>Browse recent simplifications, popular topics, and a standalone financial terms glossary.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cta-band">
+    <h2>Ready to make financial news easier to read?</h2>
+    <p>Demo articles are pre-loaded so the app looks complete right away.</p>
+    <button class="btn btn-accent" onclick="enterApp()">Open the App</button>
+  </div>
+
+  <div class="land-footer">© 2026 FinSimplify — Academic BFSI/AI project demonstration. Demo data only. Not investment advice.</div>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div id="app-shell">
+  <header class="app-nav">
+    <div class="bar">
+      <div class="brand"><span class="mark">F</span>FinSimplify</div>
+      <nav class="app-links">
+        <button class="app-link" onclick="exitApp()">Home</button>
+        <button class="app-link" data-page="news" onclick="goToPage('news')">News</button>
+        <button class="app-link" data-page="simplify" onclick="goToPage('simplify')">Simplify</button>
+        <button class="app-link" data-page="terms" onclick="goToPage('terms')">Financial Terms</button>
+        <button class="app-link active" data-page="dashboard" onclick="goToPage('dashboard')">Dashboard</button>
+      </nav>
+      <button class="hamburger" onclick="toggleMobileMenu()">☰</button>
+    </div>
+    <div class="mobile-menu" id="mobile-menu">
+      <button class="app-link" onclick="exitApp()">Home</button>
+      <button class="app-link" data-page="news" onclick="goToPage('news')">News</button>
+      <button class="app-link" data-page="simplify" onclick="goToPage('simplify')">Simplify</button>
+      <button class="app-link" data-page="terms" onclick="goToPage('terms')">Financial Terms</button>
+      <button class="app-link" data-page="dashboard" onclick="goToPage('dashboard')">Dashboard</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- DASHBOARD -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-head"><div><h1>Dashboard <span class="demo-tag">Demo data</span></h1><p>An overview of simplified news and popular topics.</p></div></div>
+      <div class="stat-grid" id="dash-stats"></div>
+      <div class="panel">
+        <h3>Recently simplified</h3>
+        <div class="news-grid" id="dash-recent"></div>
+      </div>
+      <div class="panel">
+        <h3>Popular topics</h3>
+        <div id="dash-topics"></div>
+      </div>
+      <div class="panel">
+        <h3>Category-wise news</h3>
+        <div id="dash-categories" class="stat-grid" style="margin-bottom:0"></div>
+      </div>
+    </section>
+
+    <!-- NEWS -->
+    <section class="page" id="page-news">
+      <div class="page-head"><div><h1>Financial News <span class="demo-tag">Demo data</span></h1><p>Browse and filter sample articles, or simplify any of them.</p></div></div>
+      <div class="filter-bar">
+        <div class="search-box">🔍<input id="news-search" placeholder="Search headlines..." oninput="renderNews()"></div>
+      </div>
+      <div class="chip-row" id="news-cat-filter" style="margin-bottom:20px"></div>
+      <div class="news-grid" id="news-grid"></div>
+    </section>
+
+    <!-- SIMPLIFY -->
+    <section class="page" id="page-simplify">
+      <div class="page-head"><div><h1>Simplify News</h1><p>Paste an article and let the AI-style engine break it down into plain English.</p></div></div>
+      <div class="panel">
+        <form id="simplify-form" novalidate>
+          <div class="form-grid">
+            <div class="field full"><label for="s-headline">News headline</label><input id="s-headline" placeholder="e.g. Sensex slips 400 points on weak global cues"><div class="err" id="err-s-headline"></div></div>
+            <div class="field"><label for="s-category">Category</label>
+              <select id="s-category">
+                <option value="Stock Market">Stock Market</option><option value="Banking">Banking</option><option value="Economy">Economy</option><option value="Business">Business</option><option value="Technology">Technology</option><option value="Global Markets">Global Markets</option>
+              </select>
+            </div>
+            <div class="field"><label for="s-date">Date</label><input id="s-date" type="date"></div>
+            <div class="field full"><label for="s-text">Paste news article text</label><textarea id="s-text" rows="7" placeholder="Paste the full article text here..."></textarea><div class="err" id="err-s-text"></div></div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" onclick="loadSampleText()">Load sample text</button>
+            <button type="submit" class="btn btn-primary">Simplify with AI →</button>
+          </div>
+        </form>
+        <div class="ai-panel" id="ai-panel"></div>
+      </div>
+    </section>
+
+    <!-- FINANCIAL TERMS -->
+    <section class="page" id="page-terms">
+      <div class="page-head"><div><h1>Financial Terms</h1><p>Quick, simple explanations of common terms you'll see in the news.</p></div></div>
+      <div class="term-grid" id="term-grid"></div>
+    </section>
+  </main>
+</div>
+
+<!-- READ MORE MODAL -->
+<div class="modal-overlay" id="read-modal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="rm-headline"></h3><button class="modal-close" onclick="closeModal('read-modal')">✕</button></div>
+    <div class="modal-body">
+      <p id="rm-meta" style="font-size:.82rem"></p>
+      <p id="rm-text"></p>
+      <button class="btn btn-primary btn-sm" id="rm-simplify-btn">Simplify this article →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================
+   DEMO DATA — clearly labeled demo news + glossary
+   ===================================================== */
+const GLOSSARY = {
+  'inflation': 'The rate at which prices for goods and services rise over time, reducing how much your money can buy.',
+  'gdp': 'Gross Domestic Product — the total value of everything a country produces in a given period; a measure of economic size.',
+  'interest rate': 'The cost of borrowing money, usually shown as a percentage charged by a lender.',
+  'repo rate': 'The rate at which a country\'s central bank lends money to other banks — it influences all other interest rates.',
+  'stock': 'A small ownership share in a company, bought and sold on a stock exchange.',
+  'equity': 'Another word for stock or ownership shares in a company.',
+  'mutual fund': 'A pool of money from many investors, professionally managed and invested across many stocks or bonds.',
+  'market index': 'A number that tracks the combined performance of a group of stocks, used to gauge overall market health.',
+  'ipo': 'Initial Public Offering — the first time a private company sells shares to the public.',
+  'dividend': 'A portion of a company\'s profit paid out to shareholders.',
+  'volatility': 'How much and how quickly prices move up and down.',
+  'liquidity': 'How easily an asset can be converted into cash without losing value.',
+  'recession': 'A period when a country\'s economy shrinks for a sustained stretch of time.',
+  'fiscal deficit': 'The gap between how much a government spends and how much it earns in a year.',
+  'bull market': 'A period when prices are generally rising and investor confidence is high.',
+  'bear market': 'A period when prices are generally falling and investor confidence is low.',
+  'market capitalization': 'The total value of a company\'s shares — share price multiplied by number of shares.',
+  'merger': 'When two companies combine to form one company.',
+  'acquisition': 'When one company buys and takes control of another.',
+  'quarterly earnings': 'A company\'s profit report covering a three-month period.'
+};
+
+const TERMS_SECTION = ['Inflation','GDP','Interest Rate','Stock','Mutual Fund','Market Index'];
+
+const SIMPLE_WORD_MAP = [
+  [/plummet(ed|s)?/gi,'dropped sharply'],[/surge(d|s)?/gi,'rose quickly'],[/soar(ed|s)?/gi,'rose sharply'],
+  [/tumble(d|s)?/gi,'fell sharply'],[/bullish/gi,'expecting prices to rise'],[/bearish/gi,'expecting prices to fall'],
+  [/volatile/gi,'moving up and down a lot'],[/robust/gi,'strong'],[/headwinds/gi,'challenges'],
+  [/tailwinds/gi,'helpful conditions'],[/subdued/gi,'weak'],[/buoyant/gi,'strong and positive'],
+  [/underperform(ed|ing)?/gi,'did worse than expected'],[/outperform(ed|ing)?/gi,'did better than expected'],
+  [/contraction/gi,'shrinking'],[/expansion/gi,'growth'],[/hawkish/gi,'leaning toward raising interest rates'],
+  [/dovish/gi,'leaning toward keeping or cutting interest rates']
+];
+
+function seedNews(){
+  return [
+    {id:1, headline:'RBI holds repo rate steady amid moderating inflation, signals cautious optimism', category:'Banking', date:'2026-09-20',
+      text:'The Reserve Bank of India kept the repo rate unchanged at its latest policy meeting, citing moderating inflation and steady GDP growth. The central bank\'s monetary policy committee noted that while headline inflation has eased, it remains watchful of global headwinds and volatile crude oil prices. Analysts said the decision signals a cautious but stable outlook for borrowing costs in the near term.',
+      summary:'RBI left interest rates unchanged as inflation cools, signaling a stable outlook for borrowing costs.'},
+    {id:2, headline:'Sensex, Nifty close lower as weak global cues weigh on investor sentiment', category:'Stock Market', date:'2026-09-19',
+      text:'Indian benchmark indices Sensex and Nifty closed in the red on Friday, tracking weak global cues and a bearish trend in Asian markets. Volatility spiked in the afternoon session as investors turned cautious ahead of key economic data releases. IT and banking stocks underperformed, while select pharma counters managed modest gains.',
+      summary:'Indian stock indices fell as global markets turned cautious ahead of key economic data.'},
+    {id:3, headline:'Government projects fiscal deficit to narrow on higher tax collections', category:'Economy', date:'2026-09-17',
+      text:'The finance ministry projected a narrower fiscal deficit for the current year, supported by robust tax collections and steady GDP expansion. Officials said higher revenue from both direct and indirect taxes has provided fiscal headroom, though rising subsidy costs remain a headwind. The projection is seen as a positive signal for the country\'s credit outlook.',
+      summary:'The government expects a smaller fiscal deficit this year thanks to stronger tax collections.'},
+    {id:4, headline:'Tech major announces merger to expand cloud computing footprint', category:'Technology', date:'2026-09-15',
+      text:'A leading technology company announced a merger with a cloud infrastructure firm in a deal aimed at expanding its enterprise cloud computing footprint. The acquisition, still subject to regulatory approval, is expected to boost the combined entity\'s market capitalization and strengthen its position against larger rivals. Quarterly earnings for both companies beat analyst expectations ahead of the announcement.',
+      summary:'A tech company is merging with a cloud firm to grow its enterprise cloud business.'},
+    {id:5, headline:'Retail major reports strong quarterly earnings, raises full-year outlook', category:'Business', date:'2026-09-12',
+      text:'A major retail chain reported quarterly earnings that outperformed market expectations, driven by robust festive season demand and improved margins. The company raised its full-year revenue outlook and announced a higher dividend for shareholders. Management struck a buoyant tone on the earnings call, citing expansion into smaller cities as a key growth driver.',
+      summary:'A retail chain beat earnings expectations and raised its outlook on strong festive demand.'},
+    {id:6, headline:'Global markets rally as major central banks signal a dovish stance', category:'Global Markets', date:'2026-09-10',
+      text:'Global equity markets rallied after major central banks signaled a more dovish stance on interest rates, easing concerns about tighter monetary policy. Market indices in the US, Europe and Asia posted broad-based gains, with bullish sentiment extending to emerging markets. Analysts noted that mutual fund inflows into equities picked up following the announcement.',
+      summary:'Global markets rose after central banks hinted at a softer approach to interest rates.'}
+  ];
+}
+
+let state = {
+  news: seedNews(),
+  simplifiedHistory: [
+    {headline:'RBI holds repo rate steady amid moderating inflation, signals cautious optimism', category:'Banking', date:'2026-09-20'},
+    {headline:'Sensex, Nifty close lower as weak global cues weigh on investor sentiment', category:'Stock Market', date:'2026-09-19'}
+  ],
+  newsFilterCat: 'All'
+};
+
+const CATEGORIES = ['Stock Market','Banking','Economy','Business','Technology','Global Markets'];
+const catClass = c => 'cat-' + c.replace(/\s+/g,'-');
+
+/* =====================================================
+   NAVIGATION
+   ===================================================== */
+function enterApp(){
+  document.getElementById('view-home').style.display='none';
+  document.getElementById('app-shell').style.display='block';
+  renderAll(); window.scrollTo(0,0);
+}
+function exitApp(){
+  document.getElementById('app-shell').style.display='none';
+  document.getElementById('view-home').style.display='block';
+  window.scrollTo(0,0);
+}
+function goToPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.app-link').forEach(l=>l.classList.toggle('active', l.dataset.page===name));
+  document.getElementById('mobile-menu').classList.remove('open');
+  window.scrollTo(0,0);
+}
+function toggleMobileMenu(){ document.getElementById('mobile-menu').classList.toggle('open'); }
+
+/* =====================================================
+   RENDER
+   ===================================================== */
+function renderAll(){ renderDashboard(); renderNewsFilters(); renderNews(); renderTerms(); document.getElementById('s-date').value = new Date().toISOString().slice(0,10); }
+
+function renderDashboard(){
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card"><div class="lbl">Articles available</div><div class="amt">${state.news.length}</div></div>
+    <div class="stat-card"><div class="lbl">Simplified so far</div><div class="amt">${state.simplifiedHistory.length}</div></div>
+    <div class="stat-card"><div class="lbl">Categories covered</div><div class="amt">${CATEGORIES.length}</div></div>
+    <div class="stat-card"><div class="lbl">Terms in glossary</div><div class="amt">${Object.keys(GLOSSARY).length}</div></div>
+  `;
+  document.getElementById('dash-recent').innerHTML = state.simplifiedHistory.slice(0,4).map(h => newsCardHTML(
+    state.news.find(n=>n.headline===h.headline) || {headline:h.headline, category:h.category, date:h.date, summary:'Simplified summary available in Simplify history.', text:''}
+  )).join('') || '<p style="color:var(--ink-soft)">Nothing simplified yet — try the Simplify page.</p>';
+  const topicCounts = {};
+  state.news.forEach(n => topicCounts[n.category] = (topicCounts[n.category]||0)+1);
+  document.getElementById('dash-topics').innerHTML = Object.entries(topicCounts).sort((a,b)=>b[1]-a[1]).map(([t,c]) =>
+    `<span class="topic-chip">${t} <span>(${c})</span></span>`).join('');
+  document.getElementById('dash-categories').innerHTML = CATEGORIES.map(c => {
+    const n = state.news.filter(x=>x.category===c).length;
+    return `<div class="stat-card"><div class="lbl">${c}</div><div class="amt">${n} article${n!==1?'s':''}</div></div>`;
+  }).join('');
+}
+
+function renderNewsFilters(){
+  const el = document.getElementById('news-cat-filter');
+  el.innerHTML = ['All',...CATEGORIES].map(c =>
+    `<button class="chip ${state.newsFilterCat===c?'active':''}" onclick="setNewsFilter('${c}')">${c}</button>`).join('');
+}
+function setNewsFilter(c){ state.newsFilterCat = c; renderNewsFilters(); renderNews(); }
+
+function renderNews(){
+  const q = (document.getElementById('news-search').value||'').toLowerCase();
+  const list = state.news.filter(n =>
+    (state.newsFilterCat==='All' || n.category===state.newsFilterCat) &&
+    n.headline.toLowerCase().includes(q)
+  );
+  document.getElementById('news-grid').innerHTML = list.map(newsCardHTML).join('') || '<p style="color:var(--ink-soft)">No articles match your search.</p>';
+}
+
+function newsCardHTML(n){
+  return `<div class="news-card">
+    <div class="news-top"><span class="cat-chip ${catClass(n.category)}">${n.category}</span><span class="news-date">${n.date}</span></div>
+    <h4>${n.headline}</h4>
+    <p class="summary">${n.summary}</p>
+    <div class="news-actions">
+      <button class="btn btn-primary btn-sm" onclick='simplifyFromCard(${n.id})'>Simplify News</button>
+      <button class="btn btn-ghost btn-sm" onclick='openReadMore(${n.id})'>Read More</button>
+    </div>
+  </div>`;
+}
+
+function renderTerms(){
+  document.getElementById('term-grid').innerHTML = TERMS_SECTION.map(t => {
+    const key = t.toLowerCase();
+    return `<div class="term-card"><h4>${t}</h4><p>${GLOSSARY[key]}</p></div>`;
+  }).join('');
+}
+
+/* =====================================================
+   READ MORE MODAL
+   ===================================================== */
+function openReadMore(id){
+  const n = state.news.find(x=>x.id===id);
+  document.getElementById('rm-headline').textContent = n.headline;
+  document.getElementById('rm-meta').textContent = n.category + ' • ' + n.date;
+  document.getElementById('rm-text').textContent = n.text;
+  document.getElementById('rm-simplify-btn').onclick = () => { closeModal('read-modal'); simplifyFromCard(id); };
+  document.getElementById('read-modal').classList.add('open');
+}
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+function simplifyFromCard(id){
+  const n = state.news.find(x=>x.id===id);
+  goToPage('simplify');
+  document.getElementById('s-headline').value = n.headline;
+  document.getElementById('s-category').value = n.category;
+  document.getElementById('s-date').value = n.date;
+  document.getElementById('s-text').value = n.text;
+  runSimplify();
+}
+
+function loadSampleText(){
+  const n = state.news[Math.floor(Math.random()*state.news.length)];
+  document.getElementById('s-headline').value = n.headline;
+  document.getElementById('s-category').value = n.category;
+  document.getElementById('s-date').value = n.date;
+  document.getElementById('s-text').value = n.text;
+}
+
+/* =====================================================
+   AI SIMPLIFICATION ENGINE (rule-based demo)
+   Kept isolated so it can be swapped for a real AI/API
+   model later — same output shape: {summary, mainPoints,
+   terms[], simpleText, whatHappened, whyMatters, impact}
+   ===================================================== */
+function simplifyArticle(headline, category, text){
+  const sentences = text.split(/(?<=[.!?])\s+/).filter(s=>s.trim().length>0);
+
+  // Simple word substitution
+  let simpleText = text;
+  SIMPLE_WORD_MAP.forEach(([re,repl]) => { simpleText = simpleText.replace(re, repl); });
+
+  // Summary: first sentence + a numeric/keyword-bearing sentence
+  const numericSentence = sentences.find(s => /\d/.test(s)) || sentences[1] || '';
+  const summary = (sentences[0] || headline) + (numericSentence && numericSentence !== sentences[0] ? ' ' + numericSentence : '');
+
+  // Main points: sentences containing numbers, %, or category-relevant keywords
+  const mainPoints = sentences.filter(s => /\d|%|percent|rate|growth|earnings|market/i.test(s)).slice(0,4);
+  if(mainPoints.length === 0) mainPoints.push(sentences[0] || headline);
+
+  // Key terms found
+  const lower = text.toLowerCase();
+  const foundTerms = Object.keys(GLOSSARY).filter(term => lower.includes(term));
+
+  const whatHappened = sentences[0] || headline;
+  const whyMattersByCategory = {
+    'Stock Market':'Stock market movements like this affect how companies raise money and can shift overall investor confidence.',
+    'Banking':'Banking and interest rate decisions affect loan costs, savings returns, and borrowing across the whole economy.',
+    'Economy':'Broad economic indicators like this shape government policy, business planning, and general cost of living.',
+    'Business':'Company-level results like this can affect employment, supplier businesses, and sector-wide confidence.',
+    'Technology':'Technology sector moves often signal where investment and innovation are headed next.',
+    'Global Markets':'Global market shifts can ripple into local markets through trade, investment flows, and currency movements.'
+  };
+  const whyMatters = whyMattersByCategory[category] || 'This kind of news can influence broader market sentiment and economic conditions.';
+  const impact = 'In general, news like this tends to influence investor sentiment and can affect prices in the short term. This is a general observation only — it is not personalized investment advice, and it is not a recommendation to buy or sell anything.';
+
+  return { summary, mainPoints, terms: foundTerms, simpleText, whatHappened, whyMatters, impact };
+}
+
+document.getElementById('simplify-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  runSimplify();
+});
+
+function runSimplify(){
+  const headline = document.getElementById('s-headline').value.trim();
+  const category = document.getElementById('s-category').value;
+  const date = document.getElementById('s-date').value || new Date().toISOString().slice(0,10);
+  const text = document.getElementById('s-text').value.trim();
+  const setErr = (id,msg) => { document.getElementById('err-'+id).textContent = msg; };
+  setErr('s-headline',''); setErr('s-text','');
+  let valid = true;
+  if(!headline){ setErr('s-headline','Please enter a headline.'); valid=false; }
+  if(!text || text.length < 20){ setErr('s-text','Paste at least a short paragraph of article text.'); valid=false; }
+  if(!valid) return;
+
+  const result = simplifyArticle(headline, category, text);
+
+  state.simplifiedHistory.unshift({headline, category, date});
+  state.simplifiedHistory = state.simplifiedHistory.slice(0,8);
+
+  const panel = document.getElementById('ai-panel');
+  panel.innerHTML = `
+    <h3 style="margin-bottom:14px">AI Explanation <span class="demo-tag">Rule-based demo</span></h3>
+    <div class="ai-section"><h4>🟣 What happened?</h4><p>${result.whatHappened}</p></div>
+    <div class="ai-section"><h4>🟠 Why does it matter?</h4><p>${result.whyMatters}</p></div>
+    <div class="ai-section terms"><h4>📘 Key terms</h4>
+      ${result.terms.length ? result.terms.map(t => `<span class="term-pill"><b>${t}:</b> ${GLOSSARY[t]}</span>`).join('') : '<p>No glossary terms were detected in this text.</p>'}
+    </div>
+    <div class="ai-section"><h4>💬 Simple explanation</h4><p>${result.simpleText}</p>
+      <ul>${result.mainPoints.map(p=>`<li>${p}</li>`).join('')}</ul>
+      <p class="impact-note">${result.impact}</p>
+    </div>
+  `;
+  panel.classList.add('show');
+  panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+  renderDashboard();
+}
+</script>
+</body>
+</html>
